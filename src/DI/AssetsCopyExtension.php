@@ -33,10 +33,15 @@ class AssetsCopyExtension extends Nette\DI\CompilerExtension
 			throw new Nette\IOException("Directory '$wwwDir/$destination' is not writable.");
 		}
 
-		/** @var \SplFileInfo $file */
-		foreach (Finder::findFiles($config['mask'])->from($config['dirs']) as $file) {
-			$filename = $file->getFilename();
-			copy($file->getPathname(), "$wwwDir/$destination/$filename");
+		foreach ($config['dirs'] as $dir) {
+			/** @var \SplFileInfo $file */
+			foreach (Finder::findFiles($config['mask'])->from($dir) as $file) {
+				$filename = substr($file->getPathname(), strlen($dir) + 1);
+				$destFile = "$wwwDir/$destination/$filename";
+
+				@mkdir(dirname($destFile), 0777, TRUE);
+			    copy($file->getPathname(), $destFile);
+			}
 		}
 	}
 }
